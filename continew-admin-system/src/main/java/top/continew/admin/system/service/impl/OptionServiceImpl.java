@@ -17,8 +17,12 @@
 package top.continew.admin.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alicp.jetcache.anno.Cached;
+import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import top.continew.admin.common.constant.CacheConstants;
@@ -59,9 +63,19 @@ public class OptionServiceImpl implements OptionService {
     }
 
     @Override
+    @Cached(key = "#category", name = CacheConstants.OPTION_KEY_PREFIX + "MAP:")
+    public Map<String, String> getByCategory(String category) {
+        return baseMapper.selectByCategory(category)
+            .stream()
+            .collect(Collectors.toMap(OptionDO::getCode, o -> StrUtil.emptyIfNull(ObjectUtil.defaultIfNull(o
+                .getValue(), o.getDefaultValue())), (oldVal, newVal) -> oldVal));
+    }
+
+    @Override
     public void update(List<OptionReq> options) {
         Map<String, String> passwordPolicyOptionMap = options.stream()
-            .filter(option -> StrUtil.startWith(option.getCode(), PasswordPolicyEnum.PREFIX))
+            .filter(option -> StrUtil.startWith(option
+                .getCode(), PasswordPolicyEnum.CATEGORY + StringConstants.UNDERLINE))
             .collect(Collectors.toMap(OptionReq::getCode, OptionReq::getValue, (oldVal, newVal) -> oldVal));
         // 校验密码策略参数取值范围
         for (Map.Entry<String, String> passwordPolicyOptionEntry : passwordPolicyOptionMap.entrySet()) {
@@ -78,7 +92,16 @@ public class OptionServiceImpl implements OptionService {
     @Override
     public void resetValue(OptionResetValueReq req) {
         RedisUtils.deleteByPattern(CacheConstants.OPTION_KEY_PREFIX + StringConstants.ASTERISK);
-        baseMapper.lambdaUpdate().set(OptionDO::getValue, null).in(OptionDO::getCode, req.getCode()).update();
+        String category = req.getCategory();
+        List<String> codeList = req.getCode();
+        ValidationUtils.throwIf(StrUtil.isBlank(category) && CollUtil.isEmpty(codeList), "键列表不能为空");
+        LambdaUpdateChainWrapper<OptionDO> chainWrapper = baseMapper.lambdaUpdate().set(OptionDO::getValue, null);
+        if (StrUtil.isNotBlank(category)) {
+            chainWrapper.eq(OptionDO::getCategory, category);
+        } else {
+            chainWrapper.in(OptionDO::getCode, req.getCode());
+        }
+        chainWrapper.update();
     }
 
     @Override

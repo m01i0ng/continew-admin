@@ -107,34 +107,44 @@ VALUES
 
 -- 初始化默认参数
 INSERT INTO "sys_option"
-("name", "code", "value", "default_value", "description", "update_user", "update_time")
+("id", "category", "name", "code", "value", "default_value", "description", "update_user", "update_time")
 VALUES
-('系统标题', 'SITE_TITLE', NULL, 'ContiNew Admin', '用于显示登录页面的系统标题。', NULL, NULL),
-('版权信息', 'SITE_COPYRIGHT', NULL,
- 'Copyright © 2022-present&nbsp;<a href="https://blog.charles7c.top/about/me" target="_blank" rel="noopener">Charles7c</a>&nbsp;<span>⋅</span>&nbsp;<a href="https://github.com/Charles7c/continew-admin" target="_blank" rel="noopener">ContiNew Admin</a>&nbsp;<span>⋅</span>&nbsp;<a href="https://beian.miit.gov.cn" target="_blank" rel="noopener">津ICP备2022005864号-3</a>',
- '用于显示登录页面的底部版权信息。', NULL, NULL),
-('系统LOGO（16*16）', 'SITE_FAVICON', NULL, '/favicon.ico', '用于显示浏览器地址栏的系统LOGO。', NULL, NULL),
-('系统LOGO（33*33）', 'SITE_LOGO', NULL, '/logo.svg', '用于显示登录页面的系统LOGO。', NULL, NULL),
-('登录密码错误锁定账号的次数', 'PASSWORD_ERROR_LOCK_COUNT', NULL, '5', '取值范围为 0-10（0 表示不锁定）。', NULL, NULL),
-('登录密码错误锁定账号的时间（min）', 'PASSWORD_ERROR_LOCK_MINUTES', NULL, '5', '取值范围为 1-1440（一天）。', NULL, NULL),
-('密码有效期（天）', 'PASSWORD_EXPIRATION_DAYS', NULL, '0', '取值范围为 0-999（0 表示永久有效）。', NULL, NULL),
-('密码到期提前提示（天）', 'PASSWORD_EXPIRATION_WARNING_DAYS', NULL, '0', '密码到期 N 天前进行提示（0 表示不提示）。', NULL, NULL),
-('密码重复使用规则', 'PASSWORD_REUSE_POLICY', NULL, '5', '不允许使用最近 N 次密码，取值范围为 3-32。', NULL, NULL),
-('密码最小长度', 'PASSWORD_MIN_LENGTH', NULL, '8', '取值范围为 8-32。', NULL, NULL),
-('密码是否允许包含正反序账号名', 'PASSWORD_ALLOW_CONTAIN_USERNAME', NULL, '1', '', NULL, NULL),
-('密码是否必须包含特殊字符', 'PASSWORD_CONTAIN_SPECIAL_CHARACTERS', NULL, '0', '', NULL, NULL);
+(1, 'SITE', '系统标题', 'SITE_TITLE', NULL, 'ContiNew Admin', '用于显示登录页面的系统标题。', NULL, NULL),
+(2, 'SITE', '系统描述', 'SITE_DESCRIPTION', NULL, '持续迭代优化的前后端分离中后台管理系统框架', NULL, NULL, NULL),
+(3, 'SITE', '版权信息', 'SITE_COPYRIGHT', NULL, 'Copyright © 2022 - present ContiNew Admin 版权所有', '用于显示登录页面的底部版权信息。', NULL, NULL),
+(4, 'SITE', '备案号', 'SITE_BEIAN', NULL, '津ICP备2022005864号-3', 'ICP备案号', NULL, NULL),
+(5, 'SITE', 'favicon', 'SITE_FAVICON', NULL, '/favicon.ico', '用于显示浏览器地址栏的系统LOGO。', NULL, NULL),
+(6, 'SITE', '系统LOGO', 'SITE_LOGO', NULL, '/logo.svg', '用于显示登录页面的系统LOGO。', NULL, NULL),
+(7, 'PASSWORD', '登录密码错误锁定账号的次数', 'PASSWORD_ERROR_LOCK_COUNT', NULL, '5', '取值范围为 0-10（0 表示不锁定）。', NULL, NULL),
+(8, 'PASSWORD', '登录密码错误锁定账号的时间（min）', 'PASSWORD_ERROR_LOCK_MINUTES', NULL, '5', '取值范围为 1-1440（一天）。', NULL, NULL),
+(9, 'PASSWORD', '密码有效期（天）', 'PASSWORD_EXPIRATION_DAYS', NULL, '0', '取值范围为 0-999（0 表示永久有效）。', NULL, NULL),
+(10, 'PASSWORD', '密码到期提前提示（天）', 'PASSWORD_EXPIRATION_WARNING_DAYS', NULL, '0', '密码到期 N 天前进行提示（0 表示不提示）。', NULL, NULL),
+(11, 'PASSWORD', '密码重复使用次数', 'PASSWORD_REPETITION_TIMES', NULL, '3', '不允许使用最近 N 次密码，取值范围为 3-32。', NULL, NULL),
+(12, 'PASSWORD', '密码最小长度', 'PASSWORD_MIN_LENGTH', NULL, '8', '取值范围为 8-32。', NULL, NULL),
+(13, 'PASSWORD', '密码是否允许包含正反序账号名', 'PASSWORD_ALLOW_CONTAIN_USERNAME', NULL, '1', NULL, NULL, NULL),
+(14, 'PASSWORD', '密码是否必须包含特殊字符', 'PASSWORD_REQUIRE_SYMBOLS', NULL, '0', NULL, NULL, NULL),
+(15, 'MAIL', '发送协议', 'MAIL_PROTOCOL', NULL, 'smtp', NULL, NULL, NULL),
+(16, 'MAIL', '服务器地址', 'MAIL_HOST', NULL, 'smtp.126.com', NULL, NULL, NULL),
+(17, 'MAIL', '服务器端口', 'MAIL_PORT', NULL, '465', NULL, NULL, NULL),
+(18, 'MAIL', '用户名', 'MAIL_USERNAME', NULL, 'charles7c@126.com', NULL, NULL, NULL),
+(19, 'MAIL', '密码', 'MAIL_PASSWORD', NULL, NULL, NULL, NULL, NULL),
+(20, 'MAIL', '是否启用SSL', 'MAIL_SSL_ENABLED', NULL, '1', NULL, NULL, NULL),
+(21, 'MAIL', 'SSL端口', 'MAIL_SSL_PORT', NULL, '465', NULL, NULL, NULL);
 
 -- 初始化默认字典
 INSERT INTO "sys_dict"
 ("id", "name", "code", "description", "is_system", "create_user", "create_time", "update_user", "update_time")
 VALUES
-(547889614262632491, '公告类型', 'notice_type', NULL, true, 1, NOW(), NULL, NULL);
+(1, '公告类型', 'notice_type', NULL, true, 1, NOW(), NULL, NULL),
+(2, '消息类型', 'message_type', NULL, true, 1, NOW(), NULL, NULL);
 
 INSERT INTO "sys_dict_item"
 ("id", "label", "value", "color", "sort", "description", "status", "dict_id", "create_user", "create_time", "update_user", "update_time")
 VALUES
-(547889649658363951, '通知', '1', 'blue', 1, NULL, 1, 547889614262632491, 1, NOW(), NULL, NULL),
-(547890124537462835, '活动', '2', 'orangered', 2, NULL, 1, 547889614262632491, 1, NOW(), NULL, NULL);
+(1, '通知', '1', 'blue', 1, NULL, 1, 1, 1, NOW(), NULL, NULL),
+(2, '活动', '2', 'orangered', 2, NULL, 1, 1, 1, NOW(), NULL, NULL),
+(3, '安全消息', '1', 'blue', 1, NULL, 1, 2, 1, NOW(), NULL, NULL),
+(4, '活动消息', '2', 'orangered', 2, NULL, 1, 2, 1, NOW(), NULL, NULL);
 
 -- 初始化默认用户和角色关联数据
 INSERT INTO "sys_user_role"
@@ -161,5 +171,5 @@ INSERT INTO "sys_role_dept" ("role_id", "dept_id") VALUES (547888897925840928, 5
 INSERT INTO "sys_storage"
 ("id", "name", "code", "type", "access_key", "secret_key", "endpoint", "bucket_name", "domain", "description", "is_default", "sort", "status", "create_user", "create_time", "update_user", "update_time")
 VALUES
-(547890346239983671, '开发环境', 'local_dev', 2, NULL, NULL, NULL, 'C:/continew-admin/data/file/', 'http://localhost:8000/file', '本地存储', true, 1, 1, 1, NOW(), NULL, NULL),
-(547890366586552377, '生产环境', 'local_prod', 2, NULL, NULL, NULL, '../data/file/', 'http://api.continew.top/file', '本地存储', false, 2, 2, 1, NOW(), NULL, NULL);
+(1, '开发环境', 'local_dev', 2, NULL, NULL, NULL, 'C:/continew-admin/data/file/', 'http://localhost:8000/file', '本地存储', true, 1, 1, 1, NOW(), NULL, NULL),
+(2, '生产环境', 'local_prod', 2, NULL, NULL, NULL, '../data/file/', 'http://api.continew.top/file', '本地存储', false, 2, 2, 1, NOW(), NULL, NULL);

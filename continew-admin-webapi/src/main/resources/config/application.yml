@@ -5,7 +5,7 @@ project:
   # 应用名称
   app-name: continew-admin
   # 版本
-  version: 3.1.0-SNAPSHOT
+  version: 3.1.0
   # 描述
   description: 持续迭代优化的前后端分离中后台管理系统框架，开箱即用，持续提供舒适的开发体验。
   # 基本包
@@ -18,7 +18,7 @@ project:
   ## 许可协议信息配置
   license:
     name: Apache-2.0
-    url: https://github.com/Charles7c/continew-admin/blob/dev/LICENSE
+    url: https://github.com/continew-org/continew-admin/blob/dev/LICENSE
 
 --- ### 日志配置
 continew-starter.log:
@@ -47,14 +47,6 @@ continew-starter.web:
       enable-invoke-time-print: false
       pattern: '[$spanId][$traceId]'
       mdc-enable: false
-
---- ### 线程池配置
-continew-starter.thread-pool:
-  enabled: true
-  # 队列容量
-  queue-capacity: 128
-  # 活跃时间（单位：秒）
-  keep-alive-seconds: 300
 
 --- ### 接口文档配置
 springdoc:
@@ -186,6 +178,16 @@ cosid:
         machine-bit: 3
         sequence-bit: 9
 
+--- ### 认证配置
+auth:
+  ## 密码配置
+  password:
+    excludes:
+      - /auth/route
+      - /auth/user/info
+      - /auth/logout
+      - /system/user/password
+
 --- ### 服务器配置
 server:
   servlet:
@@ -210,17 +212,43 @@ server:
 spring:
   application:
     name: ${project.app-name}
+  main:
+    # 允许定义重名的 bean 对象覆盖原有的 bean
+    allow-bean-definition-overriding: true
+    # 允许循环依赖
+    allow-circular-references: true
   ## 环境配置
   profiles:
     # 启用的环境
     active: dev
     include:
       - generator
-  main:
-    # 允许定义重名的 bean 对象覆盖原有的 bean
-    allow-bean-definition-overriding: true
-    # 允许循环依赖
-    allow-circular-references: true
+  ## 线程池配置（默认启用扩展配置，如未指定 corePoolSize、maxPoolSize 则根据机器配置自动设置）
+  task:
+    # 异步任务
+    execution:
+      thread-name-prefix: task-pool
+      # 任务拒绝策略（默认 ABORT，不执行新任务，直接抛出 RejectedExecutionException 异常）
+      # CALLER_RUNS：提交的任务在执行被拒绝时，会由提交任务的线程去执行
+      rejected-policy: CALLER_RUNS
+      pool:
+        keep-alive: 300s
+      shutdown:
+        # 是否等待任务执行完成再关闭线程池（默认 false）
+        await-termination: true
+        # 等待时间
+        await-termination-period: 30s
+    # 定时任务
+    scheduling:
+      thread-name-prefix: schedule-pool
+      # 任务拒绝策略（默认 ABORT，不执行新任务，直接抛出 RejectedExecutionException 异常）
+      # CALLER_RUNS：提交的任务在执行被拒绝时，会由提交任务的线程去执行
+      rejected-policy: CALLER_RUNS
+      shutdown:
+        # 是否等待任务执行完成再关闭线程池（默认 false）
+        await-termination: true
+        # 等待时间
+        await-termination-period: 30s
 
 --- ### 健康检查配置
 management.health:

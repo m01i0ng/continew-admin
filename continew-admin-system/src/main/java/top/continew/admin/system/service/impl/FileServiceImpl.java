@@ -31,7 +31,6 @@ import org.dromara.x.file.storage.core.upload.UploadPretreatment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import top.continew.admin.system.enums.FileTypeEnum;
-import top.continew.admin.system.enums.StorageTypeEnum;
 import top.continew.admin.system.mapper.FileMapper;
 import top.continew.admin.system.model.entity.FileDO;
 import top.continew.admin.system.model.entity.StorageDO;
@@ -119,9 +118,8 @@ public class FileServiceImpl extends BaseServiceImpl<FileMapper, FileDO, FileRes
         });
         // 处理本地存储文件 URL
         FileInfo fileInfo = uploadPretreatment.upload();
-        fileInfo.setUrl(StorageTypeEnum.LOCAL.equals(storage.getType())
-            ? URLUtil.normalize(storage.getDomain() + StringConstants.SLASH + fileInfo.getUrl())
-            : fileInfo.getUrl());
+        String domain = StrUtil.appendIfMissing(storage.getDomain(), StringConstants.SLASH);
+        fileInfo.setUrl(URLUtil.normalize(domain + fileInfo.getPath() + fileInfo.getFilename()));
         return fileInfo;
     }
 
@@ -148,7 +146,7 @@ public class FileServiceImpl extends BaseServiceImpl<FileMapper, FileDO, FileRes
         super.fill(obj);
         if (obj instanceof FileResp fileResp && !URLUtils.isHttpUrl(fileResp.getUrl())) {
             StorageDO storage = storageService.getById(fileResp.getStorageId());
-            String prefix = storage.getDomain() + StringConstants.SLASH;
+            String prefix = StrUtil.appendIfMissing(storage.getDomain(), StringConstants.SLASH);
             String url = URLUtil.normalize(prefix + fileResp.getUrl());
             fileResp.setUrl(url);
             String thumbnailUrl = StrUtils.blankToDefault(fileResp.getThumbnailUrl(), url, thUrl -> URLUtil

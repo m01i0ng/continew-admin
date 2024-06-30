@@ -55,7 +55,7 @@ public class LoginHelper {
         // 记录登录信息
         HttpServletRequest request = ServletUtils.getRequest();
         loginUser.setIp(JakartaServletUtil.getClientIP(request));
-        loginUser.setAddress(IpUtils.getAddress(loginUser.getIp()));
+        loginUser.setAddress(ExceptionUtils.exToNull(() -> IpUtils.getIpv4Address(loginUser.getIp())));
         loginUser.setBrowser(ServletUtils.getBrowser(request));
         loginUser.setLoginTime(LocalDateTime.now());
         loginUser.setOs(StrUtil.subBefore(ServletUtils.getOs(request), " or", false));
@@ -93,7 +93,7 @@ public class LoginHelper {
      * @return 登录用户信息
      */
     public static LoginUser getLoginUser(String token) {
-        SaSession tokenSession = StpUtil.getTokenSessionByToken(token);
+        SaSession tokenSession = StpUtil.getStpLogic().getTokenSessionByToken(token, false);
         if (null == tokenSession) {
             return null;
         }

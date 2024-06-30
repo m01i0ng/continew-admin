@@ -55,19 +55,13 @@
         <!-- ContiNew Starter 扩展模块 - CURD（增删改查） -->
         <dependency>
             <groupId>top.continew</groupId>
-            <artifactId>continew-starter-extension-crud</artifactId>
+            <artifactId>continew-starter-extension-crud-mp</artifactId>
         </dependency>
 
         <!-- ContiNew Starter 认证模块 - JustAuth -->
         <dependency>
             <groupId>top.continew</groupId>
             <artifactId>continew-starter-auth-justauth</artifactId>
-        </dependency>
-
-        <!-- ContiNew Starter 认证模块 - SaToken -->
-        <dependency>
-            <groupId>top.continew</groupId>
-            <artifactId>continew-starter-auth-satoken</artifactId>
         </dependency>
 
         <!-- ContiNew Starter 数据访问模块 - MyBatis Plus -->
@@ -80,6 +74,18 @@
         <dependency>
             <groupId>top.continew</groupId>
             <artifactId>continew-starter-cache-jetcache</artifactId>
+        </dependency>
+
+        <!-- ContiNew Starter 消息模块 - WebSocket -->
+        <dependency>
+            <groupId>top.continew</groupId>
+            <artifactId>continew-starter-messaging-websocket</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- ContiNew Starter 消息模块 - 邮件 -->
@@ -104,6 +110,12 @@
         <dependency>
             <groupId>top.continew</groupId>
             <artifactId>continew-starter-file-excel</artifactId>
+        </dependency>
+
+        <!-- ContiNew Starter 安全模块 - 限流器 -->
+        <dependency>
+            <groupId>top.continew</groupId>
+            <artifactId>continew-starter-security-limiter</artifactId>
         </dependency>
 
         <!-- ContiNew Starter 安全模块 - 加密 -->
@@ -135,10 +147,5 @@
             <groupId>top.continew</groupId>
             <artifactId>continew-starter-json-jackson</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-
     </dependencies>
 </project>

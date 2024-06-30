@@ -14,47 +14,25 @@
  * limitations under the License.
  */
 
-package top.continew.admin.common.model.dto;
+package top.continew.admin.auth.config.satoken;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-
+/**
+ * 密码配置属性
+ *
+ * @author Charles7c
+ * @since 2024/6/15 22:15
+ */
 @Data
-public class WsMsg implements Serializable {
-    /**
-     * 消息 ID
-     */
-    public String msgId;
+@Component
+@ConfigurationProperties(prefix = "auth.password")
+public class LoginPasswordProperties {
 
     /**
-     * 发送者 ID
+     * 排除（放行）路径配置
      */
-    public String fromId;
-
-    /**
-     * 发送人名称
-     */
-    public String fromName;
-
-    /**
-     * 接受者ID
-     */
-    public String toId;
-
-    /**
-     * 消息类型
-     */
-    public int msgType;
-
-    /**
-     * 发送消息时间戳
-     */
-    public long sendTime;
-
-    /**
-     * 消息内容
-     */
-    public String content;
-
+    private String[] excludes = new String[0];
 }

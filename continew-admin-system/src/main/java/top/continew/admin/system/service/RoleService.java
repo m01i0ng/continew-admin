@@ -17,14 +17,13 @@
 package top.continew.admin.system.service;
 
 import top.continew.admin.common.model.dto.RoleDTO;
-import top.continew.admin.common.model.resp.LabelValueResp;
 import top.continew.admin.system.model.entity.RoleDO;
 import top.continew.admin.system.model.query.RoleQuery;
 import top.continew.admin.system.model.req.RoleReq;
 import top.continew.admin.system.model.resp.RoleDetailResp;
 import top.continew.admin.system.model.resp.RoleResp;
-import top.continew.starter.extension.crud.service.BaseService;
 import top.continew.starter.data.mybatis.plus.service.IService;
+import top.continew.starter.extension.crud.service.BaseService;
 
 import java.util.List;
 import java.util.Set;
@@ -36,14 +35,6 @@ import java.util.Set;
  * @since 2023/2/8 23:15
  */
 public interface RoleService extends BaseService<RoleResp, RoleDetailResp, RoleQuery, RoleReq>, IService<RoleDO> {
-
-    /**
-     * 构建字典
-     *
-     * @param list 原始列表数据
-     * @return 字典列表
-     */
-    List<LabelValueResp<Long>> buildDict(List<RoleResp> list);
 
     /**
      * 根据 ID 列表查询
@@ -76,4 +67,20 @@ public interface RoleService extends BaseService<RoleResp, RoleDetailResp, RoleQ
      * @return 角色信息
      */
     RoleDO getByCode(String code);
+
+    /**
+     * 根据角色名称查询
+     *
+     * @param list 名称列表
+     * @return 角色列表
+     */
+    List<RoleDO> listByNames(List<String> list);
+
+    /**
+     * 根据角色名称查询数量
+     *
+     * @param roleNames 名称列表
+     * @return 角色数量
+     */
+    int countByNames(List<String> roleNames);
 }

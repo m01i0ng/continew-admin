@@ -16,16 +16,21 @@
 
 package top.continew.admin.auth.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNodeConfig;
-import cn.hutool.core.util.*;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import me.zhyd.oauth.model.AuthUser;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +45,7 @@ import top.continew.admin.common.enums.GenderEnum;
 import top.continew.admin.common.enums.MenuTypeEnum;
 import top.continew.admin.common.enums.MessageTypeEnum;
 import top.continew.admin.common.model.dto.LoginUser;
+import top.continew.admin.common.model.dto.RoleDTO;
 import top.continew.admin.common.util.helper.LoginHelper;
 import top.continew.admin.system.enums.MessageTemplateEnum;
 import top.continew.admin.system.enums.PasswordPolicyEnum;
@@ -55,10 +61,14 @@ import top.continew.starter.core.autoconfigure.project.ProjectProperties;
 import top.continew.starter.core.util.validate.CheckUtils;
 import top.continew.starter.extension.crud.annotation.TreeField;
 import top.continew.starter.extension.crud.util.TreeUtils;
+import top.continew.starter.messaging.websocket.util.WebSocketUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
+import static top.continew.admin.system.enums.PasswordPolicyEnum.PASSWORD_EXPIRATION_DAYS;
 
 /**
  * 登录业务实现
@@ -81,6 +91,7 @@ public class LoginServiceImpl implements LoginService {
     private final MessageService messageService;
     private final PasswordEncoder passwordEncoder;
     private final OptionService optionService;
+    private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Override
     public String accountLogin(String username, String password, HttpServletRequest request) {
@@ -139,7 +150,7 @@ public class LoginServiceImpl implements LoginService {
             userSocial.setUserId(userId);
             userSocial.setSource(source);
             userSocial.setOpenId(openId);
-            this.sendSystemMsg(user);
+            this.sendSecurityMsg(user);
         } else {
             user = BeanUtil.copyProperties(userService.getById(userSocial.getUserId()), UserDO.class);
         }
@@ -194,10 +205,18 @@ public class LoginServiceImpl implements LoginService {
      */
     private String login(UserDO user) {
         Long userId = user.getId();
-        LoginUser loginUser = BeanUtil.copyProperties(user, LoginUser.class);
-        loginUser.setPermissions(permissionService.listPermissionByUserId(userId));
-        loginUser.setRoleCodes(permissionService.listRoleCodeByUserId(userId));
-        loginUser.setRoles(roleService.listByUserId(userId));
+        CompletableFuture<Set<String>> permissionFuture = CompletableFuture.supplyAsync(() -> permissionService
+            .listPermissionByUserId(userId), threadPoolTaskExecutor);
+        CompletableFuture<Set<String>> roleCodeFuture = CompletableFuture.supplyAsync(() -> permissionService
+            .listRoleCodeByUserId(userId), threadPoolTaskExecutor);
+        CompletableFuture<Set<RoleDTO>> roleFuture = CompletableFuture.supplyAsync(() -> roleService
+            .listByUserId(userId), threadPoolTaskExecutor);
+        CompletableFuture<Integer> passwordExpirationDaysFuture = CompletableFuture.supplyAsync(() -> optionService
+            .getValueByCode2Int(PASSWORD_EXPIRATION_DAYS.name()));
+        CompletableFuture.allOf(permissionFuture, roleCodeFuture, roleFuture);
+        LoginUser loginUser = new LoginUser(permissionFuture.join(), roleCodeFuture.join(), roleFuture
+            .join(), passwordExpirationDaysFuture.join());
+        BeanUtil.copyProperties(user, loginUser);
         return LoginHelper.login(loginUser);
     }
 
@@ -243,16 +262,20 @@ public class LoginServiceImpl implements LoginService {
     }
 
     /**
-     * 发送系统消息
+     * 发送安全消息
      *
      * @param user 用户信息
      */
-    private void sendSystemMsg(UserDO user) {
+    private void sendSecurityMsg(UserDO user) {
         MessageReq req = new MessageReq();
         MessageTemplateEnum socialRegister = MessageTemplateEnum.SOCIAL_REGISTER;
         req.setTitle(socialRegister.getTitle().formatted(projectProperties.getName()));
         req.setContent(socialRegister.getContent().formatted(user.getNickname()));
-        req.setType(MessageTypeEnum.SYSTEM);
+        req.setType(MessageTypeEnum.SECURITY);
         messageService.add(req, CollUtil.toList(user.getId()));
+        List<String> tokenList = StpUtil.getTokenValueListByLoginId(user.getId());
+        for (String token : tokenList) {
+            WebSocketUtils.sendMessage(token, "1");
+        }
     }
 }

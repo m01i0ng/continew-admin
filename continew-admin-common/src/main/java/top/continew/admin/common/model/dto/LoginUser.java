@@ -18,6 +18,7 @@ package top.continew.admin.common.model.dto;
 
 import cn.hutool.core.collection.CollUtil;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import top.continew.admin.common.constant.SysConstants;
 
 import java.io.Serial;
@@ -32,6 +33,7 @@ import java.util.Set;
  * @since 2022/12/24 13:01
  */
 @Data
+@NoArgsConstructor
 public class LoginUser implements Serializable {
 
     @Serial
@@ -98,6 +100,26 @@ public class LoginUser implements Serializable {
     private LocalDateTime loginTime;
 
     /**
+     * 最后一次修改密码时间
+     */
+    private LocalDateTime pwdResetTime;
+
+    /**
+     * 登录时系统设置的密码过期天数
+     */
+    private Integer passwordExpirationDays;
+
+    public LoginUser(Set<String> permissions,
+                     Set<String> roleCodes,
+                     Set<RoleDTO> roles,
+                     Integer passwordExpirationDays) {
+        this.permissions = permissions;
+        this.roleCodes = roleCodes;
+        this.roles = roles;
+        this.passwordExpirationDays = passwordExpirationDays;
+    }
+
+    /**
      * 是否为管理员
      *
      * @return true：是；false：否
@@ -107,5 +129,22 @@ public class LoginUser implements Serializable {
             return false;
         }
         return roleCodes.contains(SysConstants.ADMIN_ROLE_CODE);
+    }
+
+    /**
+     * 密码是否已过期
+     *
+     * @return 是否过期
+     */
+    public boolean isPasswordExpired() {
+        // 永久有效
+        if (this.passwordExpirationDays == null || this.passwordExpirationDays <= SysConstants.NO) {
+            return false;
+        }
+        // 初始密码（第三方登录用户）暂不提示修改
+        if (this.pwdResetTime == null) {
+            return false;
+        }
+        return this.pwdResetTime.plusDays(this.passwordExpirationDays).isBefore(LocalDateTime.now());
     }
 }
